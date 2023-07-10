@@ -1,0 +1,34 @@
+{
+  "name": "fspa",
+  "version": "1.0.0",
+  "description": "SPA by Files",
+  "files": [
+    "dist"
+  ],
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc && npm run cp-templates",
+    "build:dev": "tsc --watch",
+    "dev": "nodemon ./dist/index",
+    "cp-templates": "rm -rf dist/templates && mkdir dist/templates && cp lib/templates/** dist/templates"
+  },
+  "author": "Sérgio Davi",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.4.1",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "bin": {
+    "fspa": "./dist/main.js"
+  },
+  "dependencies": {
+    "browserify": "^17.0.0",
+    "cli-color": "^2.0.3",
+    "commander": "^11.0.0",
+    "date-fns": "^2.30.0",
+    "figlet": "^1.6.0"
+  }
+}

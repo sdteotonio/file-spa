@@ -1,0 +1,20 @@
+#TOP
+class #CLASS_NAME extends HTMLElement {
+  #CONTENT
+  connectedCallback() {
+    this.attachShadow({ mode: "open" });
+    this.render();
+    if (this.init) {
+      this.init();
+    }
+  }
+  render() {
+    this.shadowRoot.innerHTML =
+      this.getStyle() + window.FSPACore.BuildTemplate(this, `#TEMPLATE`);
+  }
+  getStyle() {
+    return `<style>#STYLE</style>`;
+  }
+}
+customElements.define("#TAG", #CLASS_NAME);
+#BOTTOM
