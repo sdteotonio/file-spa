@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
-import { FSPAConsts } from "../config";
+import { FSPAConsts, getLocalConfig } from "../config";
 import { LogStyleAndColor, log } from "../log";
 import { FSPAComponent } from "../models/fspa-items";
 import {
@@ -9,6 +9,7 @@ import {
   FSPATemplateReplacerModel,
   templateReplace,
 } from "../models/fspa-templates";
+import { convertClassName } from "../utils/functions";
 import { scannedComponents } from "./fspa-scanner";
 const webpack = require("webpack");
 
@@ -35,10 +36,9 @@ class FSPAComponentConstructor {
     for (const componentConfig of this.scannedComponents) {
       this.buildComponentFile(componentConfig);
     }
-    await this.createComponentsBundle();
   }
 
-  private createComponentsBundle() {
+  createComponentsBundle() {
     return new Promise((res, rej) => {
       const componentsPaths = this.scannedComponents.map(
         (cConfig) => `./${cConfig.creatorPath}`
@@ -57,22 +57,31 @@ class FSPAComponentConstructor {
           rules: [
             {
               test: /\.ts$/,
-              use: "ts-loader",
+              use: {
+                loader: "ts-loader",
+                options: {
+                  configFile: "tsconfig.fspa.json",
+                },
+              },
               exclude: /node_modules/,
             },
           ],
         },
       });
-      compiler.run((err) => {
-        if (err) {
-          log(err, LogStyleAndColor.RED);
-          rej(err);
-          return;
+      compiler.run((err, stats) => {
+        const error =
+          err ||
+          (stats?.compilation?.errors?.length
+            ? stats?.compilation?.errors
+            : null);
+        if (error) {
+          log(error, LogStyleAndColor.RED);
+          return rej(error);
         }
         compiler.close((closeErr) => {
           if (closeErr) log(closeErr, LogStyleAndColor.RED);
           log("Components constructor success!", LogStyleAndColor.GREEN_BOLD);
-          res("");
+          return res("");
         });
       });
     });
@@ -87,17 +96,21 @@ class FSPAComponentConstructor {
     if (componentConfig.stylePath) {
       cStyle = String(readFileSync(componentConfig.stylePath));
     }
-
     const cClassContent = String(readFileSync(componentConfig.creatorPath));
     let [className, classContent] = this.getComponentClassParts(cClassContent);
 
+    classContent = this.defineClassExtends(className, classContent);
     classContent = this.defineClassConstructor(classContent);
+
+    const componentTag = `${getLocalConfig().prefix}${convertClassName(
+      className
+    )}`;
 
     const componentDataReplacers: FSPATemplateReplacerModel<FSPATemplateComponentKeys>[] =
       [
         {
           key: FSPATemplateComponentKeys.TAG,
-          value: componentConfig.tag,
+          value: componentTag,
         },
         {
           key: FSPATemplateComponentKeys.CLASS_NAME,
@@ -113,16 +126,26 @@ class FSPAComponentConstructor {
         },
       ];
     const template = String(
-      readFileSync(path.join(FSPAConsts.templatesFolder, "component.template"))
+      readFileSync(
+        path.join(
+          FSPAConsts.templatesFolder,
+          FSPAConsts.componentsTemplateFileName
+        )
+      )
     );
     const templateReplaced = templateReplace<FSPATemplateComponentKeys>(
       componentDataReplacers,
       template
     );
     const componentFileContent = classContent + templateReplaced;
-    // console.log(templateReplaced);
-
     writeFileSync(componentConfig.creatorPath, componentFileContent);
+    log(
+      `@Component: <${componentTag}> ${componentConfig.creatorPath.replace(
+        FSPAConsts.itemsBuilderFolder,
+        ""
+      )}`,
+      LogStyleAndColor.BLUE_BOLD
+    );
   }
 
   getClassContentBody(classContent: string): string {
@@ -161,10 +184,19 @@ class FSPAComponentConstructor {
     }
     return classContent;
   }
+  defineClassExtends(className: string, classContent: string): string {
+    if (!classContent.includes("extends")) {
+      classContent = classContent.replace(
+        className,
+        `${className} extends HTMLElement`
+      );
+    }
+    return classContent;
+  }
 
   private getComponentClassParts(cClassContent: string): [string, string] {
+    if (!cClassContent) return [null, null];
     let classContent = cClassContent.slice(0, cClassContent.lastIndexOf("}"));
-
     const className = /class\s+(\w+)/.exec(classContent)[1];
 
     return [className, classContent];

@@ -4,5 +4,9 @@ export interface FSPAComponent {
   componentName: string;
   newComponentFilename: string;
   stylePath: string;
-  tag: string;
+}
+
+export interface FSPAService {
+  creatorPath: string;
+  serviceName: string;
 }

@@ -1,23 +1,23 @@
 export class Value<T> {
-  parentRef: any;
+  fspaParentRef: any;
   constructor(public value: T = null) {}
 
   setParent(p: any) {
-    this.parentRef = p;
+    this.fspaParentRef = p;
   }
 
   toString() {
     return this.value;
   }
 
-  setValue(nValue: T) {
+  change(nValue: T) {
     this.value = nValue;
-    if (this.parentRef) {
-      this.parentRef.render();
+    if (this.fspaParentRef) {
+      this.fspaParentRef.render();
     }
   }
 }
 
-export function fromValue<T>(value: T) {
+export function value<T>(value: T) {
   return new Value<T>(value);
 }

@@ -32,5 +32,10 @@
     "declaration": true
   },
   "include": ["lib/**/*", "webpack.config.js"],
-  "exclude": ["dist", "node_modules", "src/**/*.spec.ts"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/**/*.spec.ts"
+    // "lib/core/framework/fspa.core.ts"
+  ]
 }
