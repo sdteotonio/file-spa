@@ -11,7 +11,6 @@ const webpack = require("webpack");
 class FSPAServiceConstructor {
   scannedServices: FSPAService[] = [];
   async start() {
-    return;
     log("Start service constructor...");
     this.scannedServices = scannedServices;
     if (!this.scannedServices?.length) {
@@ -24,8 +23,8 @@ class FSPAServiceConstructor {
     for (const serviceConfig of this.scannedServices) {
       this.buildServiceFile(serviceConfig);
     }
-    await this.tscSercvices();
-    await this.createServicesBundle();
+    // await this.tscSercvices();
+    // await this.createServicesBundle();
     log("Services constructor success!", LogStyleAndColor.CYAN);
   }
   private tscSercvices() {
@@ -95,7 +94,7 @@ class FSPAServiceConstructor {
 
     const componentFileContent =
       classContent?.slice(0, classContent.lastIndexOf("}") + 1) +
-      `\n $fspaServiceToken = "${convertClassName(className)}"; \n}`;
+      `\n static $fspaServiceToken = "${convertClassName(className)}"; \n}`;
 
     writeFileSync(config.creatorPath, componentFileContent);
     log(

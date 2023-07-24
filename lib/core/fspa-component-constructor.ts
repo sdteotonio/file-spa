@@ -23,21 +23,6 @@ class FSPAComponentConstructor {
     }
     await this.build();
   }
-
-  private async build() {
-    const tempBuildPath = path.join(__dirname, FSPAConsts.preBuildFolder);
-
-    if (existsSync(tempBuildPath)) {
-      execSync(`rm -rf ${tempBuildPath}`);
-    }
-
-    mkdirSync(tempBuildPath);
-
-    for (const componentConfig of this.scannedComponents) {
-      this.buildComponentFile(componentConfig);
-    }
-  }
-
   createComponentsBundle() {
     return new Promise((res, rej) => {
       const componentsPaths = this.scannedComponents.map(
@@ -85,6 +70,20 @@ class FSPAComponentConstructor {
         });
       });
     });
+  }
+
+  private async build() {
+    const tempBuildPath = path.join(__dirname, FSPAConsts.preBuildFolder);
+
+    if (existsSync(tempBuildPath)) {
+      execSync(`rm -rf ${tempBuildPath}`);
+    }
+
+    mkdirSync(tempBuildPath);
+
+    for (const componentConfig of this.scannedComponents) {
+      this.buildComponentFile(componentConfig);
+    }
   }
 
   private buildComponentFile(componentConfig: FSPAComponent) {
@@ -148,13 +147,6 @@ class FSPAComponentConstructor {
     );
   }
 
-  getClassContentBody(classContent: string): string {
-    return classContent?.slice(
-      classContent.indexOf("{") + 1,
-      classContent.lastIndexOf("}")
-    );
-  }
-
   private defineClassConstructor(classContent: string): string {
     if (classContent.includes("constructor(")) {
       if (!classContent.includes("super(")) {
@@ -184,7 +176,7 @@ class FSPAComponentConstructor {
     }
     return classContent;
   }
-  defineClassExtends(className: string, classContent: string): string {
+  private defineClassExtends(className: string, classContent: string): string {
     if (!classContent.includes("extends")) {
       classContent = classContent.replace(
         className,

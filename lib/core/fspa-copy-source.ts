@@ -26,6 +26,7 @@ class FSPATCopySource {
       throw new Error(String(error.output));
     }
   }
+
   private copyWebSource() {
     try {
       const targetFolder = FSPAConsts.itemsBuilderFolder;

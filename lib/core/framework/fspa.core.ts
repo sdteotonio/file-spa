@@ -1,6 +1,7 @@
 import { Value } from "../../public/fspa-public-models";
 
 class FSPACore {
+  public services: Record<string, any> = {};
   buildTemplate(instance: HTMLElement, templateString) {
     templateString = this.setSimpleBind(templateString, instance);
     templateString = this.setForBind(templateString, instance);
