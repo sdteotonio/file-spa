@@ -26,6 +26,9 @@
   "bin": {
     "fspa": "./dist/main.js"
   },
+  "repository": {
+    "url": "git@github.com:sdteotonio/file-spa.git"
+  },
   "dependencies": {
     "browserify": "^17.0.0",
     "cli-color": "^2.0.3",
